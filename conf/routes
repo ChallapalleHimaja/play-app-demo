@@ -2,6 +2,14 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+
+POST /books              controllers.BooksController.createBook()
+GET  /books/:id          controllers.BooksController.getBookById(id: Integer)
+PUT  /books/:id          controllers.BooksController.updateBookById(id: Integer)
+DELETE /books/:id        controllers.BooksController.deleteBookById(id: Integer)
+GET  /books              controllers.BooksController.getAllBooks()
+
+
 GET  /helloWorld          controllers.HelloWorldController.helloWorld()
 GET  /hello/mattias       controllers.HelloWorldController.helloMattias()
 GET  /hello/:name         controllers.HelloWorldController.hello(name: String)

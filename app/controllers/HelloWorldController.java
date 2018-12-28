@@ -47,7 +47,7 @@ public class HelloWorldController extends Controller {
 
         final JsonNode json = request().body().asJson();
 
-          final String firstName = json.get("first_name").asText();
+        final String firstName = json.get("first_name").asText();
         final String lastName = json.get("last_name").asText();
 
         final Person person = Json.fromJson(json, Person.class);
@@ -67,39 +67,5 @@ public class HelloWorldController extends Controller {
         return ok(json);
 
     }
-
-    static class Person {
-
-        @JsonProperty("first_name")
-        String firstName;
-
-        @JsonProperty("last_name")
-        String lastName;
-
-        public Person(String firstName, String lastName) {
-            this.firstName = firstName;
-            this.lastName = lastName;
-        }
-
-        public Person() {
-        }
-
-        public String getFirstName() {
-            return firstName;
-        }
-
-        public void setFirstName(String firstName) {
-            this.firstName = firstName;
-        }
-
-        public String getLastName() {
-            return lastName;
-        }
-
-        public void setLastName(String lastName) {
-            this.lastName = lastName;
-        }
-    }
-
 
 }
