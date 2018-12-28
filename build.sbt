@@ -13,6 +13,8 @@ libraryDependencies += guice
 // Test Database
 libraryDependencies += "com.h2database" % "h2" % "1.4.197"
 
+libraryDependencies ++= Seq(javaJpa, "org.hibernate" % "hibernate-entitymanager" % "5.3.7.Final")
+
 // Testing libraries for dealing with CompletionStage...
 libraryDependencies += "org.assertj" % "assertj-core" % "3.6.2" % Test
 libraryDependencies += "org.awaitility" % "awaitility" % "2.0.0" % Test
