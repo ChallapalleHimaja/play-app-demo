@@ -1,9 +1,9 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import daos.BookDao;
 import models.Book;
 import play.Logger;
-import play.db.jpa.JPAApi;
 import play.db.jpa.Transactional;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -11,17 +11,19 @@ import play.mvc.Result;
 
 import javax.inject.Inject;
 import javax.persistence.TypedQuery;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public class BooksController extends Controller {
 
     private final static Logger.ALogger LOGGER = Logger.of(BooksController.class);
 
-    final JPAApi jpaApi;
+    final BookDao bookDao;
 
     @Inject
-    public BooksController(JPAApi jpaApi) {
-        this.jpaApi = jpaApi;
+    public BooksController(BookDao bookDao) {
+        this.bookDao = bookDao;
     }
 
     @Transactional
@@ -38,10 +40,9 @@ public class BooksController extends Controller {
             return badRequest("Title must be provided");
         }
 
-        jpaApi.em().persist(book);
+        final Book newBook = bookDao.create(book);
 
-        final JsonNode result = Json.toJson(book);
-
+        final JsonNode result = Json.toJson(newBook);
         return ok(result);
     }
 
@@ -52,14 +53,14 @@ public class BooksController extends Controller {
             return badRequest("Id must be provided");
         }
 
-        final Book book = jpaApi.em().find(Book.class, id);
-        if (null == book) {
+        final Optional<Book> book = bookDao.read(id);
+        if (book.isPresent()) {
+            final JsonNode result = Json.toJson(book.get());
+            return ok(result);
+        } else {
             return notFound();
         }
 
-        final JsonNode result = Json.toJson(book);
-
-        return ok(result);
     }
 
     @Transactional
@@ -69,18 +70,14 @@ public class BooksController extends Controller {
             return badRequest("Id must be provided");
         }
 
-        final Book existingBook = jpaApi.em().find(Book.class, id);
-        if (null == existingBook) {
-            return notFound();
-        }
-
         final JsonNode json = request().body().asJson();
         final Book newBook = Json.fromJson(json, Book.class);
 
-        existingBook.setTitle(newBook.getTitle());
-        jpaApi.em().persist(existingBook);
+        newBook.setId(id);
 
-        final JsonNode result = Json.toJson(existingBook);
+        final Book updatedBook = bookDao.update(newBook);
+
+        final JsonNode result = Json.toJson(updatedBook);
         return ok(result);
     }
 
@@ -91,12 +88,7 @@ public class BooksController extends Controller {
             return badRequest("Id must be provided");
         }
 
-        final Book book = jpaApi.em().find(Book.class, id);
-        if (null == book) {
-            return notFound();
-        }
-
-        jpaApi.em().remove(book);
+        final Book book = bookDao.delete(id);
 
         final JsonNode result = Json.toJson(book);
         return ok(result);
@@ -105,11 +97,9 @@ public class BooksController extends Controller {
     @Transactional
     public Result getAllBooks() {
 
-        TypedQuery<Book> query = jpaApi.em().createQuery("SELECT b FROM Book b", Book.class);
-        List<Book> books = query.getResultList();
+        Collection<Book> books = bookDao.all();
 
         final JsonNode result = Json.toJson(books);
-
         return ok(result);
     }
 
