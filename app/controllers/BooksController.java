@@ -2,6 +2,7 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import daos.BookDao;
+import daos.FakeBookDao;
 import models.Book;
 import play.Logger;
 import play.db.jpa.Transactional;
@@ -10,9 +11,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import javax.persistence.TypedQuery;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 public class BooksController extends Controller {
