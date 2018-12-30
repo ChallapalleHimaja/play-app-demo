@@ -11,7 +11,8 @@ crossScalaVersions := Seq("2.11.12", "2.12.4")
 libraryDependencies += guice
 
 // Test Database
-libraryDependencies += "com.h2database" % "h2" % "1.4.197"
+//libraryDependencies += "com.h2database" % "h2" % "1.4.197"
+libraryDependencies += "mysql" % "mysql-connector-java" % "8.0.13" // Installed MySQL 8.0.13
 
 libraryDependencies ++= Seq(javaJpa, "org.hibernate" % "hibernate-entitymanager" % "5.3.7.Final")
 
