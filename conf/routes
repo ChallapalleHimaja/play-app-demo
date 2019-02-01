@@ -2,6 +2,11 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+POST /users               controllers.UsersController.registerUser()
+GET  /users/me            controllers.UsersController.getCurrentUser()
+PUT /users/signin         controllers.UsersController.signInUser()
+PUT /users/signout        controllers.UsersController.signOutUser()
+
 
 POST /books              controllers.BooksController.createBook()
 GET  /books/:id          controllers.BooksController.getBookById(id: Integer)
