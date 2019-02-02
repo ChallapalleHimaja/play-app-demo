@@ -1,13 +1,14 @@
 package daos;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Singleton;
 import models.User;
 
 import java.util.Collection;
 import java.util.Optional;
 
+@Singleton
 public class FakeUserDao implements UserDao {
-
 
     private User user;
 

@@ -1,6 +1,8 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import controllers.security.Authenticator;
+import controllers.security.IsAdmin;
 import daos.UserDao;
 import models.User;
 import play.Logger;
@@ -87,40 +89,23 @@ public class UsersController extends Controller {
         return "ABC1234";
     }
 
+    @Authenticator
     public Result signOutUser() {
 
-        // TODO
+        final User user = (User) ctx().args.get("user");
 
-        return status(NOT_IMPLEMENTED);
+        user.setAccessToken(null);
+
+        userDao.update(user);
+
+        return ok();
     }
 
+    @Authenticator
+    @IsAdmin
     public Result getCurrentUser() {
 
-         final Optional<String> authHeader = request().header("Authorization");
-         if (!authHeader.isPresent()) {
-             return unauthorized("Go and sign in");
-         }
-
-         LOGGER.debug("Auth token = {}", authHeader.get());
-
-         if (!authHeader.get().startsWith("Bearer ")) {
-             return unauthorized("Invalid auth header format");
-         }
-
-        final String accessToken = authHeader.get().substring(7);
-        LOGGER.debug("accessToken {}", accessToken);
-        if (accessToken.isEmpty()) {
-            return unauthorized("Invalid auth header format");
-        }
-
-        final User user = userDao.findUserByAuthToken(accessToken);
-        if (null == user) {
-            return unauthorized("User not found");
-        }
-
-        if (user.getRole() != User.Role.ADMIN) {
-            return forbidden();
-        }
+        final User user = (User) ctx().args.get("user");
         
         final JsonNode result = Json.toJson(user);
 
