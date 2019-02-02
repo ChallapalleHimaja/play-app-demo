@@ -1,6 +1,7 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.io.BaseEncoding;
 import controllers.security.Authenticator;
 import controllers.security.IsAdmin;
 import daos.UserDao;
@@ -11,11 +12,13 @@ import play.mvc.Controller;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import java.util.Optional;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class UsersController extends Controller {
 
     private final static Logger.ALogger LOGGER = Logger.of(UsersController.class);
+    private final static int HASH_ITERATIONS = 100;
 
     private UserDao userDao;
 
@@ -30,8 +33,12 @@ public class UsersController extends Controller {
         final User user = Json.fromJson(json, User.class);
 
         if (null == user.getUsername() ||
-                null == user.getPassword() ||
                 null == user.getEmail()) {
+            return badRequest("Missing mandatory parameters");
+        }
+
+        final String password = json.get("password").asText();
+        if (null == password) {
             return badRequest("Missing mandatory parameters");
         }
 
@@ -39,6 +46,13 @@ public class UsersController extends Controller {
             return badRequest("User taken");
         }
 
+        final String salt = generateSalt();
+
+        final String hash = generateHash(salt, password, HASH_ITERATIONS);
+
+        user.setHashIterations(HASH_ITERATIONS);
+        user.setSalt(salt);
+        user.setPasswordHash(hash);
         user.setState(User.State.VERIFIED);
         user.setRole(User.Role.USER);
 
@@ -49,23 +63,54 @@ public class UsersController extends Controller {
         return ok(result);
     }
 
+    private String generateSalt() {
+
+        // TODO Generate random string
+
+        return "ABC";
+    }
+
+    private String generateHash(String salt, String password, int iterations) {
+        try {
+
+            final String contat = salt + ":" + password;
+
+            // TODO Run in a loop x iterations
+            // TODO User a better hash function
+            final MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(contat.getBytes());
+            final String passwordHash = BaseEncoding.base16().lowerCase().encode(messageDigest);
+
+            LOGGER.debug("Password hash {}", passwordHash);
+
+            return passwordHash;
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public Result signInUser() {
 
         final JsonNode json = request().body().asJson();
-        final User user = Json.fromJson(json, User.class);
 
-        if (null == user.getUsername() ||
-                null == user.getPassword()) {
+        final String username = json.get("username").asText();
+        final String password = json.get("password").asText();
+        if (null == password || null == username) {
             return badRequest("Missing mandatory parameters");
         }
 
-        final User existingUser = userDao.findUserByName(user.getUsername());
+        final User existingUser = userDao.findUserByName(username);
 
         if (null == existingUser) {
             return unauthorized("Wrong username");
         }
 
-        if (!existingUser.getPassword().equals(user.getPassword())) {
+        final String salt = existingUser.getSalt();
+        final int iterations = existingUser.getHashIterations();
+        final String hash = generateHash(salt, password, iterations);
+
+        if (!existingUser.getPasswordHash().equals(hash)) {
             return unauthorized("Wrong password");
         }
 
@@ -102,7 +147,7 @@ public class UsersController extends Controller {
     }
 
     @Authenticator
-    @IsAdmin
+    //@IsAdmin
     public Result getCurrentUser() {
 
         final User user = (User) ctx().args.get("user");

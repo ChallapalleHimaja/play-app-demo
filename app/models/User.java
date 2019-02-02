@@ -1,5 +1,6 @@
 package models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class User {
@@ -18,8 +19,12 @@ public class User {
     private Integer id;
     private String username;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String password;
+    @JsonIgnore
+    private String passwordHash;
+    @JsonIgnore
+    private String salt;
+    @JsonIgnore
+    private Integer hashIterations;
 
     private String email;
     private Role role;
@@ -29,10 +34,12 @@ public class User {
     public User() {
     }
 
-    public User(Integer id, String username, String password, String email, Role role, State state, String accessToken) {
+    public User(Integer id, String username, String passwordHash, String salt, Integer hashIterations, String email, Role role, State state, String accessToken) {
         this.id = id;
         this.username = username;
-        this.password = password;
+        this.passwordHash = passwordHash;
+        this.salt = salt;
+        this.hashIterations = hashIterations;
         this.email = email;
         this.role = role;
         this.state = state;
@@ -55,12 +62,28 @@ public class User {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
+    public Integer getHashIterations() {
+        return hashIterations;
+    }
+
+    public void setHashIterations(Integer hashIterations) {
+        this.hashIterations = hashIterations;
     }
 
     public String getEmail() {
