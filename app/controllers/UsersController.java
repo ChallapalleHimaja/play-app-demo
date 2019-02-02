@@ -81,6 +81,9 @@ public class UsersController extends Controller {
     }
 
     private String generateAccessToken() {
+
+        // TODO Generate a random string of 20 (or more characters)
+
         return "ABC1234";
     }
 
