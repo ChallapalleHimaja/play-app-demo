@@ -2,6 +2,10 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+POST /images             controllers.ImagesController.uploadImage()
+GET /images/:id          controllers.ImagesController.downloadImage(id: String)
+DELETE /images/:id       controllers.ImagesController.deleteImage(id: String)
+
 POST /users               controllers.UsersController.registerUser()
 GET  /users/me            controllers.UsersController.getCurrentUser()
 PUT /users/signin         controllers.UsersController.signInUser()
